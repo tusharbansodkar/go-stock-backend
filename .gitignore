@@ -1,0 +1,86 @@
+# Ignore build artifacts
+/build/
+/dist/
+/target/
+
+# Ignore dependency directories
+/node_modules/
+/vendor/
+
+# Ignore IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+
+# Ignore operating system files
+.DS_Store
+Thumbs.db
+
+# Ignore log files
+*.log
+
+# Ignore temporary files
+*~
+#*#
+
+# Ignore sensitive files (be cautious with this, secrets should ideally be handled differently)
+#*.env
+#config.json
+
+# Ignore compiled files (e.g., Python .pyc files)
+*.pyc
+
+# Ignore test coverage reports
+/coverage/
+
+# Ignore package-specific files (examples)
+# yarn.lock
+# package-lock.json
+# Gemfile.lock
+
+# Ignore editor backup files
+*.swp
+*.swo
+
+# Ignore user-specific files
+*.user
+
+# Ignore compiled Java files
+*.class
+
+# Ignore compiled C/C++ files
+*.o
+*.a
+*.so
+*.dll
+*.dylib
+
+# Ignore executable files
+*.exe
+*.out
+
+# Ignore database files
+*.sqlite
+*.db
+
+# Ignore archives
+*.zip
+*.tar
+*.gz
+*.rar
+
+# Ignore generated documentation
+/docs/
+
+# Ignore cache directories
+*.cache
+
+# Ignore specific files that might be generated
+nohup.out
+
+# Add any other specific files or directories you want to ignore here
