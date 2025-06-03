@@ -40,7 +40,7 @@ router.post("/login-broker", async (req, res) => {
     );
 
     if (response) isFivePaisaLoggedIn = true;
-    console.log("5paisa login response:", response);
+    // console.log("5paisa login response:", response);
 
     fs.writeFileSync("token.txt", response, "utf8");
 

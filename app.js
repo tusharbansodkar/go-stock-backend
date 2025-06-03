@@ -37,12 +37,11 @@ io.on("connection", (socket) => {
     update5paisaSubscription(data);
   });
 
-  // const latest = getMarketData();
+  const latest = getMarketData();
 
-  // if (latest) {
-  //   console.log("latest data:", latest);
-  //   socket.emit("marketData", latest); //Emit only to this new socket
-  // }
+  Object.values(latest).forEach(item => {
+    socket.emit("marketData", item);
+  })
 
   socket.on("disconnect", () => {
     console.log("React client disconnected", socket.id);
