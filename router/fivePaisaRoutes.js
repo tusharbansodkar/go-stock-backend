@@ -56,44 +56,9 @@ router.post(
   verifyToken,
   checkFivePaisaLogin,
   async (req, res) => {
+    // console.log(req.body);
     try {
-      const response = await client.fetch_market_feed_by_scrip([
-        {
-          Exch: "B",
-          ExchType: "C",
-          ScripCode: "0",
-          ScripData: "SENSEX_EQ",
-        },
-        {
-          Exch: "N",
-          ExchType: "C",
-          ScripCode: "0",
-          ScripData: "NIFTY_EQ",
-        },
-        {
-          Exch: "N",
-          ExchType: "C",
-          ScripCode: "0",
-          ScripData: "BANKNIFTY_EQ",
-        },
-        {
-          Exch: "N",
-          ExchType: "C",
-          ScripCode: "0",
-          ScripData: "NIFTY IT_EQ",
-        },
-        {
-          Exch: "N",
-          ExchType: "C",
-          ScripCode: "0",
-          ScripData: "FINNIFTY_EQ",
-        },
-        {
-          Exch: "N",
-          ExchType: "C",
-          ScripCode: "1660",
-        },
-      ]);
+      const response = await client.fetch_market_feed_by_scrip(req.body);
 
       res.status(200).json(response);
     } catch (error) {
@@ -102,5 +67,17 @@ router.post(
     }
   }
 );
+
+router.post('/historical-data', async (req, res) => {
+  const { exchange, exchangeType, scripCode, timeFrame, fromDate, toDate } = req.body;
+  try {
+    const response = await client.historicalData(exchange, exchangeType, scripCode, timeFrame, fromDate, toDate);
+
+    res.status(200).json(response);    
+  } catch (error) {
+    console.error("Error during fetching data:", error);
+      res.status(500).json({ error });
+  }
+})
 
 module.exports = router;
