@@ -8,7 +8,7 @@ let ws5paisa;
 let socketIO;
 let latestMarketData = {};
 const allowdScrip = new Set([
-  999901, 999920000, 999920005, 999920041, 450845, 445825, 446265
+  999901, 999920000, 999920005, 999920041, 450845, 445825, 446265, 453231, 436580, 458295
 
 ]);
 let currentSubscription = [];

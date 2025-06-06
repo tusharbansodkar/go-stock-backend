@@ -1,6 +1,7 @@
 const fs = require("fs");
 const express = require("express");
 const router = express.Router();
+const util = require("util");
 const verifyToken = require("../middlewares/verifyTokenMiddleware");
 
 const creds = {
@@ -68,16 +69,33 @@ router.post(
   }
 );
 
-router.post('/historical-data', async (req, res) => {
-  const { exchange, exchangeType, scripCode, timeFrame, fromDate, toDate } = req.body;
+router.post("/historical-data", async (req, res) => {
+  const { exchange, exchangeType, scripCode, timeFrame, fromDate, toDate } =
+    req.body;
   try {
-    const response = await client.historicalData(exchange, exchangeType, scripCode, timeFrame, fromDate, toDate);
+    const response = await client.historicalData(
+      exchange,
+      exchangeType,
+      scripCode,
+      timeFrame,
+      fromDate,
+      toDate
+    );
 
-    res.status(200).json(response);    
+    res.status(200).json(response);
   } catch (error) {
-    console.error("Error during fetching data:", error);
-      res.status(500).json({ error });
+    console.error("Error during fetching data:", util.inspect(error, {showHidden: false, depth: null, colors: true })
+);
+    res.status(500).json({
+      success: false,
+      message: "Error during fetching data",
+      error: {
+        message: error.message,
+        name: error.name,
+        ...(process.env.NODE_ENV === "development" && { stack: error.stack }),
+      },
+    });
   }
-})
+});
 
 module.exports = router;
