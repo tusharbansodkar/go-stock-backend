@@ -7,6 +7,7 @@ const { Server } = require("socket.io");
 const { init, getMarketData, update5paisaSubscription } = require("./ws5paisa");
 const authRoutes = require("./router/authRoutes");
 const fivePaisaRoutes = require("./router/fivePaisaRoutes"); // Import the market data routes
+const headlineRoute = require('./router/headlinesRoute')
 
 const app = express();
 const server = http.createServer(app);
@@ -21,6 +22,8 @@ app.use(express.json());
 app.use(cors());
 app.use("/api/auth", authRoutes);
 app.use("/api/market-data", fivePaisaRoutes); // Add this line to include the market data routes
+app.use('/api/headlines', headlineRoute);
+
 
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -48,7 +51,7 @@ io.on("connection", (socket) => {
   });
 });
 
-init(io); // Initialize WebSocket connection with Socket.IO instance
+// init(io); // Initialize WebSocket connection with Socket.IO instance
 
 server.listen(process.env.PORT, () => {
   console.log("server started.");
