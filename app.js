@@ -7,7 +7,8 @@ const { Server } = require("socket.io");
 const { init, getMarketData, update5paisaSubscription } = require("./ws5paisa");
 const authRoutes = require("./router/authRoutes");
 const fivePaisaRoutes = require("./router/fivePaisaRoutes"); // Import the market data routes
-const headlineRoute = require('./router/headlinesRoute')
+const headlineRoute = require("./router/headlinesRoute");
+const userRoute = require("./router/userRoute");
 
 const app = express();
 const server = http.createServer(app);
@@ -22,8 +23,8 @@ app.use(express.json());
 app.use(cors());
 app.use("/api/auth", authRoutes);
 app.use("/api/market-data", fivePaisaRoutes); // Add this line to include the market data routes
-app.use('/api/headlines', headlineRoute);
-
+app.use("/api/headlines", headlineRoute);
+app.use("/api/user", userRoute);
 
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -42,16 +43,16 @@ io.on("connection", (socket) => {
 
   const latest = getMarketData();
 
-  Object.values(latest).forEach(item => {
+  Object.values(latest).forEach((item) => {
     socket.emit("marketData", item);
-  })
+  });
 
   socket.on("disconnect", () => {
     console.log("React client disconnected", socket.id);
   });
 });
 
-// init(io); // Initialize WebSocket connection with Socket.IO instance
+init(io); // Initialize WebSocket connection with Socket.IO instance
 
 server.listen(process.env.PORT, () => {
   console.log("server started.");
