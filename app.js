@@ -49,6 +49,7 @@ io.on("connection", (socket) => {
 
   socket.on("unsubscribe", (data) => {
     unsubscribeMarketData(data);
+    console.log("unsubscribing", data);
   });
 
   socket.on("disconnect", () => {
@@ -56,7 +57,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// init(io); // Initialize WebSocket connection with Socket.IO instance
+init(io); // Initialize WebSocket connection with Socket.IO instance
 
 server.listen(process.env.PORT, () => {
   console.log("server started.");

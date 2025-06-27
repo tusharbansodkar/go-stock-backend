@@ -1,4 +1,5 @@
-const fs = require("fs");
+const fs = require("fs").promises;
+const path = require("path");
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("../middlewares/verifyTokenMiddleware");
@@ -15,6 +16,7 @@ const creds = {
 const { FivePaisaClient } = require("5paisajs");
 const client = new FivePaisaClient(creds);
 let isFivePaisaLoggedIn = true; // Track if 5paisa is logged in
+const tokenPath = path.join(__dirname, "..", "token.txt");
 
 // Middleware to check if 5paisa api is logged in
 const checkFivePaisaLogin = (req, res, next) => {
@@ -42,7 +44,7 @@ router.post("/login-broker", async (req, res) => {
     if (response) isFivePaisaLoggedIn = true;
     // console.log("5paisa login response:", response);
 
-    fs.writeFileSync("token.txt", response, "utf8");
+    fs.writeFileSync(tokenPath, response, "utf8");
 
     res.status(200).json({ message: "5paisa login successful" });
   } catch (error) {
@@ -68,16 +70,36 @@ router.post(
   }
 );
 
-router.post('/historical-data', async (req, res) => {
-  const { exchange, exchangeType, scripCode, timeFrame, fromDate, toDate } = req.body;
-  try {
-    const response = await client.historicalData(exchange, exchangeType, scripCode, timeFrame, fromDate, toDate);
+router.post("/historical-data", async (req, res) => {
+  const { exchange, exchangeType, scripCode, timeFrame, fromDate, toDate } =
+    req.body;
 
-    res.status(200).json(response);    
+  const apiUrl = `https://openapi.5paisa.com/V2/historical/${exchange}/${exchangeType}/${scripCode}/${timeFrame}?from=${fromDate}&end=${toDate}`;
+
+  try {
+    const token = await fs.readFile(tokenPath, "utf8");
+
+    const apiResponse = await fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.trim()}`,
+      },
+    });
+
+    if (!apiResponse.ok) {
+      const errorBody = await apiResponse.text;
+      throw new Error(
+        `API request failed with status ${apiResponse.status}: ${errorBody}`
+      );
+    }
+
+    const data = apiResponse.data.json();
+    res.status(200).json(data);
   } catch (error) {
     console.error("Error during fetching data:", error);
-      res.status(500).json({ error });
+    res.status(500).json({ error: error.message });
   }
-})
+});
 
 module.exports = router;
