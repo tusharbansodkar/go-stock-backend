@@ -44,7 +44,7 @@ router.post("/login-broker", async (req, res) => {
     if (response) isFivePaisaLoggedIn = true;
     // console.log("5paisa login response:", response);
 
-    fs.writeFileSync(tokenPath, response, "utf8");
+    fs.writeFile(tokenPath, response, "utf8");
 
     res.status(200).json({ message: "5paisa login successful" });
   } catch (error) {
@@ -71,10 +71,9 @@ router.post(
 );
 
 router.post("/historical-data", async (req, res) => {
-  const { exchange, exchangeType, scripCode, timeFrame, fromDate, toDate } =
-    req.body;
+  const { Exch, ExchType, ScripCode, TimeFrame, FromDate, ToDate } = req.body;
 
-  const apiUrl = `https://openapi.5paisa.com/V2/historical/${exchange}/${exchangeType}/${scripCode}/${timeFrame}?from=${fromDate}&end=${toDate}`;
+  const apiUrl = `https://openapi.5paisa.com/V2/historical/${Exch}/${ExchType}/${ScripCode}/${TimeFrame}?from=${FromDate}&end=${ToDate}`;
 
   try {
     const token = await fs.readFile(tokenPath, "utf8");
@@ -87,6 +86,15 @@ router.post("/historical-data", async (req, res) => {
       },
     });
 
+    const response = await apiResponse.json();
+
+    const result = response.data.candles.map((candle) => {
+      const time = candle[0].substring(0, 10);
+      const value = candle[4];
+
+      return { time, value };
+    });
+
     if (!apiResponse.ok) {
       const errorBody = await apiResponse.text;
       throw new Error(
@@ -94,8 +102,7 @@ router.post("/historical-data", async (req, res) => {
       );
     }
 
-    const data = apiResponse.data.json();
-    res.status(200).json(data);
+    res.status(200).json(result);
   } catch (error) {
     console.error("Error during fetching data:", error);
     res.status(500).json({ error: error.message });
