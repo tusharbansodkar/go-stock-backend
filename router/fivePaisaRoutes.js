@@ -72,6 +72,7 @@ router.post(
 
 router.post("/historical-data", async (req, res) => {
   const { Exch, ExchType, ScripCode, TimeFrame, FromDate, ToDate } = req.body;
+  console.log(req.body);
 
   const apiUrl = `https://openapi.5paisa.com/V2/historical/${Exch}/${ExchType}/${ScripCode}/${TimeFrame}?from=${FromDate}&end=${ToDate}`;
 
@@ -88,12 +89,7 @@ router.post("/historical-data", async (req, res) => {
 
     const response = await apiResponse.json();
 
-    const result = response.data.candles.map((candle) => {
-      const time = candle[0].substring(0, 10);
-      const value = candle[4];
-
-      return { time, value };
-    });
+    const result = response.data.candles;
 
     if (!apiResponse.ok) {
       const errorBody = await apiResponse.text;

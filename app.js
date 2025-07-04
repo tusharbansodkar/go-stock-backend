@@ -47,10 +47,10 @@ io.on("connection", (socket) => {
     update5paisaSubscription(data);
   });
 
-  // socket.on("unsubscribe", (data) => {
-  //   unsubscribeMarketData(data);
-  //   console.log("unsubscribing", data);
-  // });
+  socket.on("unsubscribe", (data) => {
+    unsubscribeMarketData(data);
+    // console.log("unsubscribing", data);
+  });
 
   socket.on("disconnect", () => {
     console.log("React client disconnected", socket.id);

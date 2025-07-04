@@ -67,7 +67,9 @@ router.post("/login", async (req, res) => {
 // get logged in user's details
 router.get("/me", verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id)
+      .select("-password")
+      .populate("watchlist");
     if (!user) return res.status(404).json({ message: "User not found." });
 
     res.json(user);
