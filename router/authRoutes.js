@@ -43,7 +43,8 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     // check if user exists
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate("watchlist");
+
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -58,7 +59,11 @@ router.post("/login", async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.status(200).json({ token, user });
+    // converting mongoose doc to plain object
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.status(200).json({ token, user: userResponse });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
