@@ -1,4 +1,5 @@
-const fs = require("fs");
+const fs = require("fs").promises;
+const path = require("path");
 const express = require("express");
 const router = express.Router();
 const util = require("util");
@@ -16,6 +17,7 @@ const creds = {
 const { FivePaisaClient } = require("5paisajs");
 const client = new FivePaisaClient(creds);
 let isFivePaisaLoggedIn = true; // Track if 5paisa is logged in
+const tokenPath = path.join(__dirname, "..", "token.txt");
 
 // Middleware to check if 5paisa api is logged in
 const checkFivePaisaLogin = (req, res, next) => {
@@ -23,7 +25,6 @@ const checkFivePaisaLogin = (req, res, next) => {
     return res.status(401).json({ error: "Not logged in to 5paisa" });
   }
 
-  // Proceed to the next middleware or route handler
   next();
 };
 
@@ -41,9 +42,8 @@ router.post("/login-broker", async (req, res) => {
     );
 
     if (response) isFivePaisaLoggedIn = true;
-    // console.log("5paisa login response:", response);
 
-    fs.writeFileSync("token.txt", response, "utf8");
+    fs.writeFile(tokenPath, response, "utf8");
 
     res.status(200).json({ message: "5paisa login successful" });
   } catch (error) {
@@ -57,7 +57,6 @@ router.post(
   verifyToken,
   checkFivePaisaLogin,
   async (req, res) => {
-    // console.log(req.body);
     try {
       const response = await client.fetch_market_feed_by_scrip(req.body);
 
@@ -70,31 +69,36 @@ router.post(
 );
 
 router.post("/historical-data", async (req, res) => {
-  const { exchange, exchangeType, scripCode, timeFrame, fromDate, toDate } =
-    req.body;
-  try {
-    const response = await client.historicalData(
-      exchange,
-      exchangeType,
-      scripCode,
-      timeFrame,
-      fromDate,
-      toDate
-    );
+  const { Exch, ExchType, ScripCode, TimeFrame, FromDate, ToDate } = req.body;
 
-    res.status(200).json(response);
-  } catch (error) {
-    console.error("Error during fetching data:", util.inspect(error, {showHidden: false, depth: null, colors: true })
-);
-    res.status(500).json({
-      success: false,
-      message: "Error during fetching data",
-      error: {
-        message: error.message,
-        name: error.name,
-        ...(process.env.NODE_ENV === "development" && { stack: error.stack }),
+  const apiUrl = `https://openapi.5paisa.com/V2/historical/${Exch}/${ExchType}/${ScripCode}/${TimeFrame}?from=${FromDate}&end=${ToDate}`;
+
+  try {
+    const token = await fs.readFile(tokenPath, "utf8");
+
+    const apiResponse = await fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.trim()}`,
       },
     });
+
+    const response = await apiResponse.json();
+
+    const result = response.data.candles;
+
+    if (!apiResponse.ok) {
+      const errorBody = await apiResponse.text;
+      throw new Error(
+        `API request failed with status ${apiResponse.status}: ${errorBody}`
+      );
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error during fetching data:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 

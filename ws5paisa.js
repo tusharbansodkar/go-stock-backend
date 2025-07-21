@@ -6,12 +6,6 @@ const token = fs.readFileSync("./token.txt", "utf8");
 
 let ws5paisa;
 let socketIO;
-let latestMarketData = {};
-const allowdScrip = new Set([
-  999901, 999920000, 999920005, 999920041, 450845, 445825, 446265, 453231, 436580, 458295
-
-]);
-let currentSubscription = [];
 
 function init(socket) {
   socketIO = socket;
@@ -19,17 +13,29 @@ function init(socket) {
 }
 
 function update5paisaSubscription(dataToFetch) {
-  currentSubscription = dataToFetch;
-
   if (ws5paisa && ws5paisa.readyState === WebSocket.OPEN) {
     const subscriptionPayload = {
       Method: "MarketFeedV3",
       Operation: "Subscribe",
       ClientCode: `${process.env.FIVEPAISA_CLIENT_CODE}`,
-      MarketFeedData: currentSubscription,
+      MarketFeedData: dataToFetch,
     };
 
     ws5paisa.send(JSON.stringify(subscriptionPayload));
+  }
+}
+
+function unsubscribeMarketData(dataToUnsubscribe) {
+  if (ws5paisa && ws5paisa.readyState === WebSocket.OPEN) {
+    const unsubscriptionPayload = {
+      Method: "MarketFeedV3",
+      Operation: "Unsubscribe",
+      ClientCode: `${process.env.FIVEPAISA_CLIENT_CODE}`,
+      MarketFeedData: dataToUnsubscribe,
+    };
+
+    ws5paisa.send(JSON.stringify(unsubscriptionPayload));
+    console.log("unsuscribed for watchlist");
   }
 }
 
@@ -37,26 +43,9 @@ function connectTo5paisa() {
   ws5paisa = new WebSocket(
     `wss://openfeed.5paisa.com/feeds/api/chat?Value1=${token}|${process.env.FIVEPAISA_CLIENT_CODE}`
   );
- 
+
   ws5paisa.on("open", () => {
     console.log("Connected to 5Paisa WebSocket");
-
-    // Subscribe to market data
-    const subsciptionPayload = {
-      Method: "MarketFeedV3",
-      Operation: "Subscribe",
-      ClientCode: `${process.env.FIVEPAISA_CLIENT_CODE}`,
-      MarketFeedData:
-        currentSubscription.length > 0
-          ? currentSubscription
-          : [
-            { Exch: "B", ExchType: "C", ScripCode: 999901 },
-            { Exch: "N", ExchType: "C", ScripCode: 999920000 },
-            { Exch: "N", ExchType: "C", ScripCode: 999920005}
-          ],
-    };
-
-    ws5paisa.send(JSON.stringify(subsciptionPayload));
   });
 
   ws5paisa.on("message", (bufferData) => {
@@ -65,17 +54,9 @@ function connectTo5paisa() {
     try {
       const parsed = JSON.parse(jsonString);
       const items = Array.isArray(parsed) ? parsed : [parsed];
-      items.forEach(item => {
-        const scrip = item.Token
-
-        if(allowdScrip.has(scrip)) {
-          latestMarketData[scrip] = item;
-          
-          // Emit the latest market data to all connected clients
-         socketIO.sockets.emit("marketData", item);
-        }
-      })
-
+      items.forEach((item) => {
+        socketIO.sockets.emit("marketData", item);
+      });
     } catch (error) {
       console.log("Failed to parse json string:", error);
     }
@@ -93,6 +74,6 @@ function connectTo5paisa() {
 
 module.exports = {
   init,
-  getMarketData: () => latestMarketData,
   update5paisaSubscription,
+  unsubscribeMarketData,
 };

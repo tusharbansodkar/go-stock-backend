@@ -23,6 +23,12 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    watchlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Scrip",
+      },
+    ],
   },
   { timestamps: true }
 );

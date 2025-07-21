@@ -29,9 +29,7 @@ router.post("/register", async (req, res) => {
     });
     await newUser.save();
 
-    res
-      .status(201)
-      .json({ message: "User created successfully", user: newUser });
+    res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -43,9 +41,10 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     // check if user exists
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate("watchlist");
+
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: "User does not exist" });
     }
 
     // check if password is correct
@@ -58,7 +57,11 @@ router.post("/login", async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.status(200).json({ token, user });
+    // converting mongoose doc to plain object
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.status(200).json({ token, user: userResponse });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -67,7 +70,9 @@ router.post("/login", async (req, res) => {
 // get logged in user's details
 router.get("/me", verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id)
+      .select("-password")
+      .populate("watchlist");
     if (!user) return res.status(404).json({ message: "User not found." });
 
     res.json(user);
