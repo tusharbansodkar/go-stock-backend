@@ -24,7 +24,6 @@ const checkFivePaisaLogin = (req, res, next) => {
     return res.status(401).json({ error: "Not logged in to 5paisa" });
   }
 
-  // Proceed to the next middleware or route handler
   next();
 };
 
@@ -42,7 +41,6 @@ router.post("/login-broker", async (req, res) => {
     );
 
     if (response) isFivePaisaLoggedIn = true;
-    // console.log("5paisa login response:", response);
 
     fs.writeFile(tokenPath, response, "utf8");
 
@@ -58,7 +56,6 @@ router.post(
   verifyToken,
   checkFivePaisaLogin,
   async (req, res) => {
-    // console.log(req.body);
     try {
       const response = await client.fetch_market_feed_by_scrip(req.body);
 
@@ -72,7 +69,6 @@ router.post(
 
 router.post("/historical-data", async (req, res) => {
   const { Exch, ExchType, ScripCode, TimeFrame, FromDate, ToDate } = req.body;
-  console.log(req.body);
 
   const apiUrl = `https://openapi.5paisa.com/V2/historical/${Exch}/${ExchType}/${ScripCode}/${TimeFrame}?from=${FromDate}&end=${ToDate}`;
 

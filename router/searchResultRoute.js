@@ -13,8 +13,6 @@ router.get("/", async (req, res) => {
       });
     }
 
-    const searchTerm = string.trim();
-
     const result = await Scrip.find({
       $or: [
         { Name: { $regex: string, $options: "i" } },

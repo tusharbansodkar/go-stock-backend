@@ -29,9 +29,7 @@ router.post("/register", async (req, res) => {
     });
     await newUser.save();
 
-    res
-      .status(201)
-      .json({ message: "User created successfully", user: newUser });
+    res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -46,7 +44,7 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ email }).populate("watchlist");
 
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: "User does not exist" });
     }
 
     // check if password is correct

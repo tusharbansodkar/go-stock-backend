@@ -49,7 +49,6 @@ io.on("connection", (socket) => {
 
   socket.on("unsubscribe", (data) => {
     unsubscribeMarketData(data);
-    // console.log("unsubscribing", data);
   });
 
   socket.on("disconnect", () => {
