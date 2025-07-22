@@ -1,9 +1,8 @@
-const fs = require("fs").promises;
-const path = require("path");
+require("dotenv").config();
 const express = require("express");
 const router = express.Router();
-const util = require("util");
 const verifyToken = require("../middlewares/verifyTokenMiddleware");
+const Token = require("../models/token");
 
 const creds = {
   appSource: process.env.FIVEPAISA_APP_SOURCE,
@@ -17,7 +16,6 @@ const creds = {
 const { FivePaisaClient } = require("5paisajs");
 const client = new FivePaisaClient(creds);
 let isFivePaisaLoggedIn = true; // Track if 5paisa is logged in
-const tokenPath = path.join(__dirname, "..", "token.txt");
 
 // Middleware to check if 5paisa api is logged in
 const checkFivePaisaLogin = (req, res, next) => {
@@ -41,9 +39,14 @@ router.post("/login-broker", async (req, res) => {
       process.env.FIVEPAISA_PIN
     );
 
-    if (response) isFivePaisaLoggedIn = true;
-
-    fs.writeFile(tokenPath, response, "utf8");
+    if (response) {
+      isFivePaisaLoggedIn = true;
+      await Token.findOneAndUpdate(
+        { service: "5paisa" },
+        { token: response },
+        { upsert: true, new: true }
+      );
+    }
 
     res.status(200).json({ message: "5paisa login successful" });
   } catch (error) {
@@ -74,7 +77,8 @@ router.post("/historical-data", async (req, res) => {
   const apiUrl = `https://openapi.5paisa.com/V2/historical/${Exch}/${ExchType}/${ScripCode}/${TimeFrame}?from=${FromDate}&end=${ToDate}`;
 
   try {
-    const token = await fs.readFile(tokenPath, "utf8");
+    const tokenDoc = await Token.findOne({ service: "5paisa" });
+    const token = tokenDoc?.token;
 
     const apiResponse = await fetch(apiUrl, {
       method: "GET",

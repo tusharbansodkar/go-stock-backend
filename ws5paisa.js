@@ -1,11 +1,10 @@
-const WebSocket = require("ws");
-const fs = require("fs");
 require("dotenv").config();
-
-const token = fs.readFileSync("./token.txt", "utf8");
+const WebSocket = require("ws");
+const Token = require("./models/token");
 
 let ws5paisa;
 let socketIO;
+let fivePaisaToken;
 
 function init(socket) {
   socketIO = socket;
@@ -39,9 +38,15 @@ function unsubscribeMarketData(dataToUnsubscribe) {
   }
 }
 
-function connectTo5paisa() {
+async function connectTo5paisa() {
+  const tokenDoc = await Token.findOne({ service: "5paisa" });
+
+  if (tokenDoc) {
+    fivePaisaToken = tokenDoc?.token;
+  }
+
   ws5paisa = new WebSocket(
-    `wss://openfeed.5paisa.com/feeds/api/chat?Value1=${token}|${process.env.FIVEPAISA_CLIENT_CODE}`
+    `wss://openfeed.5paisa.com/feeds/api/chat?Value1=${fivePaisaToken}|${process.env.FIVEPAISA_CLIENT_CODE}`
   );
 
   ws5paisa.on("open", () => {
