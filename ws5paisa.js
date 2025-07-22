@@ -1,6 +1,6 @@
 require("dotenv").config();
 const WebSocket = require("ws");
-const Token = require("./models/token");
+const Token = require("./models/token.js");
 
 let ws5paisa;
 let socketIO;
