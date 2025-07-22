@@ -42,7 +42,7 @@ async function connectTo5paisa() {
   const tokenDoc = await Token.findOne({ service: "5paisa" });
 
   if (tokenDoc) {
-    fivePaisaToken = tokenDoc?.token;
+    fivePaisaToken = tokenDoc.token;
   }
 
   ws5paisa = new WebSocket(

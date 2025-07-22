@@ -78,7 +78,7 @@ router.post("/historical-data", async (req, res) => {
 
   try {
     const tokenDoc = await Token.findOne({ service: "5paisa" });
-    const token = tokenDoc?.token;
+    const token = tokenDoc.token;
 
     const apiResponse = await fetch(apiUrl, {
       method: "GET",
