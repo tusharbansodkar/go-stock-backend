@@ -1,0 +1,20 @@
+diff --git a/node_modules/node-pandas/src/utils/getTransformedDataList.js b/node_modules/node-pandas/src/utils/getTransformedDataList.js
+index 1862f4d..46c89f5 100644
+--- a/node_modules/node-pandas/src/utils/getTransformedDataList.js
++++ b/node_modules/node-pandas/src/utils/getTransformedDataList.js
+@@ -1,4 +1,4 @@
+-const dataType = require('../utils/dataType')
++const dataType = require('../utils/datatype')
+ 
+ function getTransformedDataList(dataList, columns) {
+     let index = []
+diff --git a/node_modules/node-pandas/src/utils/utils.js b/node_modules/node-pandas/src/utils/utils.js
+index e09bab3..c7c4127 100644
+--- a/node_modules/node-pandas/src/utils/utils.js
++++ b/node_modules/node-pandas/src/utils/utils.js
+@@ -1,4 +1,4 @@
+-const dataType = require('./dataType') // require('dataType') => Error: Cannot find module 'dataType'
++const dataType = require('./datatype') // require('dataType') => Error: Cannot find module 'dataType'
+ const getTransformedDataList = require('./getTransformedDataList')
+ const getIndicesColumns = require('./getIndicesColumns')
+ const excludingColumns = require("./excludingColumns")
