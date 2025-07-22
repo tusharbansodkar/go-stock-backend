@@ -1,5 +1,5 @@
 const express = require("express");
-const User = require("../models/User.js");
+const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const verifyToken = require("../middlewares/verifyTokenMiddleware");
 const mongoose = require("mongoose");
