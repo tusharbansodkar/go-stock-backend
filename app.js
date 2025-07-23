@@ -56,7 +56,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// init(io); // Initialize WebSocket connection with Socket.IO instance
+init(io); // Initialize WebSocket connection with Socket.IO instance
 
 server.listen(process.env.PORT, () => {
   console.log("server started.");
